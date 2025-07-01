@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Shoe Manufacturing Inventory Dashboard">
+    <title>Dashboard | Shoe Manufacturing Inventory</title>
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/components.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+    
+    <!-- External Libraries -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/index.min.js"></script>
+</head>
+<body class="dashboard-page">
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p>Loading dashboard data...</p>
+    </div>
+
+    <!-- Navigation Drawer Toggle Button -->
+    <button id="home-drawer-toggle" class="home-drawer-toggle" title="Back to Home" onclick="window.location.href='index.html'">
+        <i class="fas fa-home"></i>
+    </button>
+
+    <!-- Header Component -->
+    <header id="app-header" class="app-header">
+        <!-- Header content will be injected by Header.js -->
+    </header>
+
+    <!-- Main Dashboard Container -->
+    <main class="dashboard-main">
+        <!-- Enhanced Sidebar Navigation -->
+        <aside id="sidebar" class="sidebar">
+            <!-- Sidebar Header -->
+            <div class="sidebar-header">
+                <div class="sidebar-brand">
+                    <i class="fas fa-industry brand-icon"></i>
+                    <span class="brand-text">UPTOP</span>
+                </div>
+                <button id="sidebar-close" class="sidebar-close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav class="sidebar-nav">
+                <!-- Home Section -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    <ul class="nav-menu">
+                        <li class="nav-item">
+                            <a href="index.html" class="nav-link" data-page="home">
+                                <i class="fas fa-home"></i>
+                                <span>Home</span>
+                            </a>
+                        </li>
+                        <li class="nav-item active">
+                            <a href="#dashboard" class="nav-link" data-page="dashboard">
+                                <i class="fas fa-tachometer-alt"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Inventory Section -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Inventory</div>
+                    <ul class="nav-menu">
+                        <li class="nav-item">
+                            <a href="#inventory" class="nav-link" data-page="inventory">
+                                <i class="fas fa-boxes"></i>
+                                <span>Inventory</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#production" class="nav-link" data-page="production">
+                                <i class="fas fa-industry"></i>
+                                <span>Production</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#export" class="nav-link" data-page="export">
+                                <i class="fas fa-shipping-fast"></i>
+                                <span>Export & Sales</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Demo & Testing Section -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Demo & Testing</div>
+                    <ul class="nav-menu">
+                        <li class="nav-item">
+                            <a href="inventory-app/demo.html" class="nav-link external-link" data-page="demo">
+                                <i class="fas fa-play-circle"></i>
+                                <span>Demo</span>
+                                <i class="fas fa-external-link-alt external-icon"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="inventory-app/test-simple.html" class="nav-link external-link" data-page="test">
+                                <i class="fas fa-vial"></i>
+                                <span>Test Connection</span>
+                                <i class="fas fa-external-link-alt external-icon"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="inventory-app/dashboard.html" class="nav-link external-link" data-page="legacy-dashboard">
+                                <i class="fas fa-chart-line"></i>
+                                <span>Legacy Dashboard</span>
+                                <i class="fas fa-external-link-alt external-icon"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <div class="sidebar-user-info">
+                    <div class="user-avatar-small">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-details-small">
+                        <div class="user-name-small">Current User</div>
+                        <div class="user-status">Online</div>
+                    </div>
+                </div>
+                <button class="btn btn-outline btn-sm home-btn" onclick="window.location.href='index.html'">
+                    <i class="fas fa-home"></i>
+                    <span>Back to Home</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Content Area -->
+        <div class="content-wrapper">
+            <!-- Page Content Container -->
+            <div id="page-content" class="page-content">
+                <!-- Dashboard Summary Cards -->
+                <section id="summary-cards" class="summary-section">
+                    <!-- Summary cards will be injected by SummaryCards.js -->
+                </section>
+
+                <!-- Filters and Controls -->
+                <section class="controls-section">
+                    <div class="filters-container">
+                        <div class="filter-group">
+                            <label for="date-range">Date Range:</label>
+                            <select id="date-range" class="filter-select">
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month" selected>This Month</option>
+                                <option value="quarter">This Quarter</option>
+                                <option value="year">This Year</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="category-filter">Category:</label>
+                            <select id="category-filter" class="filter-select">
+                                <option value="all">All Categories</option>
+                                <option value="purchase">Purchase Orders</option>
+                                <option value="production">Production</option>
+                                <option value="finished">Finished Goods</option>
+                                <option value="issues">Issues</option>
+                                <option value="bgrade">B-Grade Sales</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <button id="refresh-data" class="btn btn-primary">
+                                <i class="fas fa-sync-alt"></i>
+                                Refresh Data
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Charts Section -->
+                <section id="charts-section" class="charts-section">
+                    <!-- Charts will be injected by ChartSection.js -->
+                </section>
+
+                <!-- Data Tables Section -->
+                <section id="tables-section" class="tables-section">
+                    <!-- Tables will be injected by InventoryTable.js -->
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Container -->
+    <div id="modal-container">
+        <!-- Modals will be injected by Modal.js -->
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container">
+        <!-- Toast notifications will appear here -->
+    </div>
+
+    <!-- Scripts -->
+    <!-- Core Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/utils/helpers.js"></script>
+    <script src="js/utils/formatters.js"></script>
+    <script src="js/utils/validators.js"></script>
+    
+    <!-- Services -->
+    <script src="js/services/authService.js"></script>
+    <script src="js/services/spreadsheetService.js"></script>
+    <script src="js/services/dataCache.js"></script>
+    
+    <!-- State Management -->
+    <script src="js/state/state.js"></script>
+    <script src="js/state/events.js"></script>
+    
+    <!-- Components -->
+    <script src="js/components/Header.js"></script>
+    <script src="js/components/SummaryCards.js"></script>
+    <script src="js/components/InventoryTable.js"></script>
+    <script src="js/components/ChartSection.js"></script>
+    <script src="js/components/Modal.js"></script>
+    
+    <!-- Pages -->
+    <script src="js/pages/dashboardPage.js"></script>
+    <script src="js/pages/inventoryPage.js"></script>
+    <script src="js/pages/productionPage.js"></script>
+    <script src="js/pages/exportPage.js"></script>
+    
+    <!-- Router and App -->
+    <script src="js/router.js"></script>
+    <script src="js/app.js"></script>
+    
+    <script>
+        // Enhanced Sidebar Functionality
+        function initializeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const sidebarClose = document.getElementById('sidebar-close');
+            const contentWrapper = document.querySelector('.content-wrapper');
+
+            // Create overlay for mobile
+            const overlay = document.createElement('div');
+            overlay.className = 'sidebar-overlay';
+            overlay.id = 'sidebar-overlay';
+            document.body.appendChild(overlay);
+
+            // Toggle sidebar function
+            function toggleSidebar() {
+                if (window.innerWidth <= 768) {
+                    // Mobile behavior
+                    sidebar.classList.toggle('open');
+                    overlay.classList.toggle('active');
+                } else {
+                    // Desktop behavior
+                    sidebar.classList.toggle('collapsed');
+                    if (contentWrapper) {
+                        contentWrapper.classList.toggle('sidebar-collapsed');
+                    }
+                }
+            }
+
+            // Close sidebar function
+            function closeSidebar() {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+            }
+
+            // Event listeners
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', toggleSidebar);
+            }
+
+            if (sidebarClose) {
+                sidebarClose.addEventListener('click', closeSidebar);
+            }
+
+            overlay.addEventListener('click', closeSidebar);
+
+            // Handle navigation clicks
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    const page = this.getAttribute('data-page');
+
+                    // Handle external links
+                    if (this.classList.contains('external-link')) {
+                        return; // Let the default behavior handle it
+                    }
+
+                    // Handle internal routing
+                    if (page && page !== 'home') {
+                        e.preventDefault();
+                        Router.navigate(page);
+
+                        // Close mobile sidebar
+                        if (window.innerWidth <= 768) {
+                            closeSidebar();
+                        }
+                    }
+                });
+            });
+
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.remove('active');
+                }
+            });
+        }
+
+        // Initialize dashboard when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication
+            if (!AuthService.isAuthenticated()) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Initialize app
+            App.init();
+
+            // Initialize enhanced sidebar
+            initializeSidebar();
+
+            // Load dashboard page
+            Router.navigate('dashboard');
+        });
+    </script>
+</body>
+</html>

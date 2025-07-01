@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shoe Manufacturing Inventory</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <h1>🏭 Shoe Manufacturing Inventory</h1>
+            <div class="header-actions">
+                <button onclick="window.location.href='../index.html'" class="btn btn-success">
+                    <span class="btn-icon">🏠</span>
+                    Back to Home
+                </button>
+                <button id="refresh-btn" class="btn btn-primary">
+                    <span class="btn-icon">🔄</span>
+                    Refresh Data
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <!-- Status Messages -->
+            <div id="status-container" class="status-container">
+                <!-- Loading, error, and success messages will appear here -->
+            </div>
+
+            <!-- Data Summary -->
+            <section id="summary-section" class="summary-section hidden">
+                <h2>📊 Inventory Summary</h2>
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <div class="summary-label">Total Items</div>
+                        <div class="summary-value" id="total-items">-</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">Total Quantity</div>
+                        <div class="summary-value" id="total-quantity">-</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">Total Value</div>
+                        <div class="summary-value" id="total-value">-</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">Last Updated</div>
+                        <div class="summary-value" id="last-updated">-</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Data Table -->
+            <section id="table-section" class="table-section hidden">
+                <div class="table-header">
+                    <h2>📋 Purchase Orders</h2>
+                    <div class="table-controls">
+                        <input type="text" id="search-input" placeholder="Search..." class="search-input">
+                        <button id="export-btn" class="btn btn-secondary">
+                            <span class="btn-icon">📥</span>
+                            Export CSV
+                        </button>
+                    </div>
+                </div>
+
+
+                <div class="table-container">
+                    <table id="data-table" class="data-table">
+                        <thead id="table-head">
+                            <!-- Table headers will be generated dynamically -->
+                        </thead>
+                        <tbody id="table-body">
+                            <!-- Table rows will be generated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-footer">
+                    <div id="table-info" class="table-info">
+                        Showing 0 of 0 entries
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Shoe Manufacturing Inventory System</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Modules -->
+    <script src="js/utils.js"></script>
+    <script src="js/gs-data-service.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

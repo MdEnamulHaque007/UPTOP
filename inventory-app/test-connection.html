@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Sheets Connection Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .loading { background-color: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #6c757d; cursor: not-allowed; }
+        pre {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+            border: 1px solid #e9ecef;
+        }
+        .data-preview {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 Google Sheets Connection Test</h1>
+        <p>This page tests the connection to your Google Sheet using the OpenSheet API.</p>
+        
+        <div class="info">
+            <strong>Sheet ID:</strong> 1TgjxVUu9Bci2ivFxk1hHPGVNVfUsxztXD4QoZEXsYUc<br>
+            <strong>Sheet Range:</strong> PO!A:N<br>
+            <strong>API URL:</strong> <span id="api-url"></span>
+        </div>
+        
+        <button onclick="testConnection()" id="test-btn">Test Connection</button>
+        <button onclick="clearResults()" id="clear-btn">Clear Results</button>
+        
+        <div id="status"></div>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const SHEET_ID = '1TgjxVUu9Bci2ivFxk1hHPGVNVfUsxztXD4QoZEXsYUc';
+        const SHEET_NAME = 'PO';
+        const API_URL = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
+        
+        // Display API URL
+        document.getElementById('api-url').textContent = API_URL;
+        
+        async function testConnection() {
+            const statusDiv = document.getElementById('status');
+            const resultsDiv = document.getElementById('results');
+            const testBtn = document.getElementById('test-btn');
+            
+            // Reset
+            resultsDiv.innerHTML = '';
+            testBtn.disabled = true;
+            
+            // Show loading
+            statusDiv.innerHTML = '<div class="loading">🔄 Testing connection to Google Sheets...</div>';
+            
+            try {
+                console.log('Fetching data from:', API_URL);
+                
+                const response = await fetch(API_URL);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                console.log('Response received:', data);
+                
+                // Success
+                statusDiv.innerHTML = `
+                    <div class="success">
+                        ✅ Connection successful! 
+                        Retrieved ${data.length} rows of data.
+                    </div>
+                `;
+                
+                // Display results
+                displayResults(data);
+                
+            } catch (error) {
+                console.error('Connection failed:', error);
+                
+                statusDiv.innerHTML = `
+                    <div class="error">
+                        ❌ Connection failed: ${error.message}
+                        <br><br>
+                        <strong>Possible solutions:</strong>
+                        <ul style="margin: 10px 0; padding-left: 20px;">
+                            <li>Make sure your Google Sheet is publicly accessible</li>
+                            <li>Verify the Sheet ID is correct</li>
+                            <li>Check that the 'PO' sheet tab exists</li>
+                            <li>Ensure you have an internet connection</li>
+                        </ul>
+                    </div>
+                `;
+                
+                // Show error details
+                resultsDiv.innerHTML = `
+                    <h3>Error Details:</h3>
+                    <pre>${error.stack || error.message}</pre>
+                `;
+            } finally {
+                testBtn.disabled = false;
+            }
+        }
+        
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            
+            if (!data || data.length === 0) {
+                resultsDiv.innerHTML = '<div class="info">No data found in the sheet.</div>';
+                return;
+            }
+            
+            // Show first few rows in a table
+            const previewData = data.slice(0, 10);
+            const headers = Object.keys(previewData[0]);
+            
+            let tableHtml = `
+                <h3>📊 Data Preview (first ${previewData.length} rows):</h3>
+                <div class="data-preview">
+                    <table>
+                        <thead>
+                            <tr>
+                                ${headers.map(header => `<th>${header}</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${previewData.map(row => `
+                                <tr>
+                                    ${headers.map(header => `<td>${row[header] || ''}</td>`).join('')}
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            // Show raw JSON for first row
+            tableHtml += `
+                <h3>🔍 Sample Row (JSON):</h3>
+                <pre>${JSON.stringify(data[0], null, 2)}</pre>
+            `;
+            
+            // Show data structure analysis
+            tableHtml += `
+                <h3>📈 Data Analysis:</h3>
+                <div class="info">
+                    <strong>Total Rows:</strong> ${data.length}<br>
+                    <strong>Columns Found:</strong> ${headers.length}<br>
+                    <strong>Column Names:</strong> ${headers.join(', ')}<br>
+                    <strong>Data Types:</strong> ${analyzeDataTypes(data[0])}
+                </div>
+            `;
+            
+            resultsDiv.innerHTML = tableHtml;
+        }
+        
+        function analyzeDataTypes(sampleRow) {
+            const types = {};
+            for (const [key, value] of Object.entries(sampleRow)) {
+                if (value === null || value === undefined || value === '') {
+                    types[key] = 'empty';
+                } else if (!isNaN(value) && !isNaN(parseFloat(value))) {
+                    types[key] = 'number';
+                } else if (Date.parse(value)) {
+                    types[key] = 'date';
+                } else {
+                    types[key] = 'text';
+                }
+            }
+            
+            return Object.entries(types)
+                .map(([key, type]) => `${key}: ${type}`)
+                .join(', ');
+        }
+        
+        function clearResults() {
+            document.getElementById('status').innerHTML = '';
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        // Auto-test on page load
+        window.addEventListener('load', () => {
+            setTimeout(testConnection, 1000);
+        });
+    </script>
+</body>
+</html>

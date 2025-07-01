@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Sheets Data Fetch Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8fafc;
+            line-height: 1.6;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .status {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .success { background-color: #d4edda; color: #155724; border-left: 4px solid #28a745; }
+        .error { background-color: #f8d7da; color: #721c24; border-left: 4px solid #dc3545; }
+        .info { background-color: #d1ecf1; color: #0c5460; border-left: 4px solid #17a2b8; }
+        .loading { background-color: #fff3cd; color: #856404; border-left: 4px solid #ffc107; }
+        .warning { background-color: #ffeaa7; color: #856404; border-left: 4px solid #fd7e14; }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            margin: 10px 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        button:disabled { 
+            background: #6c757d; 
+            cursor: not-allowed; 
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .data-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .data-card h4 {
+            margin: 0 0 10px 0;
+            color: #495057;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .data-card .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        th, td {
+            border: 1px solid #dee2e6;
+            padding: 12px 8px;
+            text-align: left;
+        }
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        tr:hover {
+            background-color: #e3f2fd;
+        }
+        
+        .table-container {
+            max-height: 500px;
+            overflow: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+        }
+        
+        pre {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 12px;
+            border: 1px solid #e9ecef;
+            white-space: pre-wrap;
+        }
+        
+        .url-display {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+            margin: 15px 0;
+        }
+        
+        .section {
+            margin: 30px 0;
+            padding: 20px 0;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .section:first-child {
+            border-top: none;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        
+        .badge-success { background: #d4edda; color: #155724; }
+        .badge-warning { background: #fff3cd; color: #856404; }
+        .badge-error { background: #f8d7da; color: #721c24; }
+        .badge-info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔗 Google Sheets Data Fetcher</h1>
+            <p>Testing connection to your shoe manufacturing inventory data</p>
+        </div>
+        
+        <div class="section">
+            <h2>📋 Connection Details</h2>
+            <div class="info">
+                <strong>Sheet ID:</strong> 1TgjxVUu9Bci2ivFxk1hHPGVNVfUsxztXD4QoZEXsYUc<br>
+                <strong>Sheet Name:</strong> PO<br>
+                <strong>Range:</strong> A:N (All rows, columns A through N)
+            </div>
+            
+            <div class="url-display">
+                <strong>API Endpoint:</strong><br>
+                <span id="api-url">https://opensheet.elk.sh/1TgjxVUu9Bci2ivFxk1hHPGVNVfUsxztXD4QoZEXsYUc/PO</span>
+            </div>
+            
+            <button onclick="fetchData()" id="fetch-btn">
+                <span id="btn-text">🚀 Fetch Data from Google Sheets</span>
+            </button>
+            <button onclick="clearResults()" id="clear-btn">🗑️ Clear Results</button>
+            <button onclick="downloadData()" id="download-btn" disabled>💾 Download as JSON</button>
+        </div>
+        
+        <div id="status"></div>
+        
+        <div id="summary" class="section" style="display: none;">
+            <h2>📊 Data Summary</h2>
+            <div id="summary-cards" class="data-grid"></div>
+        </div>
+        
+        <div id="preview" class="section" style="display: none;">
+            <h2>👀 Data Preview</h2>
+            <div id="preview-content"></div>
+        </div>
+        
+        <div id="raw-data" class="section" style="display: none;">
+            <h2>🔍 Raw JSON Data</h2>
+            <details>
+                <summary>Click to view raw JSON response</summary>
+                <pre id="json-display"></pre>
+            </details>
+        </div>
+    </div>
+
+    <script>
+        const SHEET_ID = '1TgjxVUu9Bci2ivFxk1hHPGVNVfUsxztXD4QoZEXsYUc';
+        const SHEET_NAME = 'PO';
+        const API_URL = `https://opensheet.elk.sh/${SHEET_ID}/${SHEET_NAME}`;
+        
+        let fetchedData = null;
+        
+        async function fetchData() {
+            const statusDiv = document.getElementById('status');
+            const fetchBtn = document.getElementById('fetch-btn');
+            const btnText = document.getElementById('btn-text');
+            const downloadBtn = document.getElementById('download-btn');
+            
+            // Reset UI
+            hideAllSections();
+            downloadBtn.disabled = true;
+            fetchBtn.disabled = true;
+            
+            // Show loading
+            btnText.innerHTML = '<span class="spinner"></span> Fetching data...';
+            statusDiv.innerHTML = '<div class="loading">🔄 Connecting to Google Sheets API...</div>';
+            
+            try {
+                console.log('🚀 Starting data fetch from:', API_URL);
+                console.time('Data Fetch');
+                
+                const response = await fetch(API_URL, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                console.log('📡 Response received:', response.status, response.statusText);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.timeEnd('Data Fetch');
+                console.log('✅ Data parsed successfully:', data);
+                
+                fetchedData = data;
+                
+                // Success message
+                statusDiv.innerHTML = `
+                    <div class="success">
+                        ✅ Successfully fetched ${data.length} rows from Google Sheets!
+                        <br><small>Response time: ${performance.now().toFixed(0)}ms</small>
+                    </div>
+                `;
+                
+                // Display results
+                displaySummary(data);
+                displayPreview(data);
+                displayRawData(data);
+                
+                downloadBtn.disabled = false;
+                
+            } catch (error) {
+                console.error('❌ Fetch failed:', error);
+                
+                statusDiv.innerHTML = `
+                    <div class="error">
+                        ❌ Failed to fetch data: ${error.message}
+                        <br><br>
+                        <strong>Troubleshooting steps:</strong>
+                        <ol style="margin: 10px 0; padding-left: 20px; text-align: left;">
+                            <li>Verify your Google Sheet is publicly accessible</li>
+                            <li>Check that the 'PO' sheet tab exists</li>
+                            <li>Ensure you have an internet connection</li>
+                            <li>Try opening the API URL directly: <a href="${API_URL}" target="_blank">Test API</a></li>
+                        </ol>
+                    </div>
+                `;
+                
+                // Show detailed error
+                document.getElementById('raw-data').style.display = 'block';
+                document.getElementById('json-display').textContent = `Error Details:\n${error.stack || error.message}`;
+                
+            } finally {
+                fetchBtn.disabled = false;
+                btnText.innerHTML = '🔄 Fetch Data Again';
+            }
+        }
+        
+        function displaySummary(data) {
+            if (!data || data.length === 0) {
+                document.getElementById('summary').style.display = 'block';
+                document.getElementById('summary-cards').innerHTML = '<div class="warning">No data found in the sheet.</div>';
+                return;
+            }
+            
+            // Analyze data
+            const totalRows = data.length;
+            const columns = Object.keys(data[0]);
+            const columnCount = columns.length;
+            
+            // Calculate some basic stats
+            let totalValue = 0;
+            let totalQuantity = 0;
+            let statusCounts = {};
+            
+            data.forEach(row => {
+                // Try to sum numeric values
+                const value = parseFloat(row.total_value || row.value || row.amount || 0);
+                const quantity = parseFloat(row.quantity || row.qty || 0);
+                
+                totalValue += isNaN(value) ? 0 : value;
+                totalQuantity += isNaN(quantity) ? 0 : quantity;
+                
+                // Count statuses
+                const status = row.status || 'unknown';
+                statusCounts[status] = (statusCounts[status] || 0) + 1;
+            });
+            
+            const summaryHtml = `
+                <div class="data-card">
+                    <h4>Total Rows</h4>
+                    <div class="value">${totalRows}</div>
+                </div>
+                <div class="data-card">
+                    <h4>Columns</h4>
+                    <div class="value">${columnCount}</div>
+                </div>
+                <div class="data-card">
+                    <h4>Total Value</h4>
+                    <div class="value">$${totalValue.toLocaleString()}</div>
+                </div>
+                <div class="data-card">
+                    <h4>Total Quantity</h4>
+                    <div class="value">${totalQuantity.toLocaleString()}</div>
+                </div>
+            `;
+            
+            document.getElementById('summary-cards').innerHTML = summaryHtml;
+            document.getElementById('summary').style.display = 'block';
+        }
+        
+        function displayPreview(data) {
+            if (!data || data.length === 0) {
+                document.getElementById('preview').style.display = 'block';
+                document.getElementById('preview-content').innerHTML = '<div class="info">No data to preview.</div>';
+                return;
+            }
+            
+            const previewData = data.slice(0, 20); // Show first 20 rows
+            const headers = Object.keys(previewData[0]);
+            
+            let tableHtml = `
+                <div class="info">
+                    Showing first ${previewData.length} of ${data.length} rows
+                    <br><strong>Columns:</strong> ${headers.join(', ')}
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                ${headers.map(header => `<th>${header}</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${previewData.map((row, index) => `
+                                <tr>
+                                    <td><strong>${index + 1}</strong></td>
+                                    ${headers.map(header => {
+                                        let value = row[header] || '';
+                                        let badge = '';
+                                        
+                                        // Add badges for certain values
+                                        if (header.toLowerCase().includes('status')) {
+                                            const status = value.toLowerCase();
+                                            if (status.includes('complete') || status.includes('done')) {
+                                                badge = 'badge-success';
+                                            } else if (status.includes('pending') || status.includes('progress')) {
+                                                badge = 'badge-warning';
+                                            } else if (status.includes('cancel') || status.includes('error')) {
+                                                badge = 'badge-error';
+                                            } else {
+                                                badge = 'badge-info';
+                                            }
+                                            value = `<span class="badge ${badge}">${value}</span>`;
+                                        }
+                                        
+                                        return `<td>${value}</td>`;
+                                    }).join('')}
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            document.getElementById('preview-content').innerHTML = tableHtml;
+            document.getElementById('preview').style.display = 'block';
+        }
+        
+        function displayRawData(data) {
+            const jsonDisplay = document.getElementById('json-display');
+            
+            // Show formatted JSON
+            const formattedJson = JSON.stringify(data, null, 2);
+            jsonDisplay.textContent = formattedJson;
+            
+            document.getElementById('raw-data').style.display = 'block';
+        }
+        
+        function hideAllSections() {
+            document.getElementById('summary').style.display = 'none';
+            document.getElementById('preview').style.display = 'none';
+            document.getElementById('raw-data').style.display = 'none';
+        }
+        
+        function clearResults() {
+            document.getElementById('status').innerHTML = '';
+            hideAllSections();
+            fetchedData = null;
+            document.getElementById('download-btn').disabled = true;
+            document.getElementById('btn-text').innerHTML = '🚀 Fetch Data from Google Sheets';
+        }
+        
+        function downloadData() {
+            if (!fetchedData) return;
+            
+            const dataStr = JSON.stringify(fetchedData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `inventory_data_${new Date().toISOString().split('T')[0]}.json`;
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Show success message
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML += '<div class="success">📁 Data downloaded successfully!</div>';
+        }
+        
+        // Auto-fetch on page load
+        window.addEventListener('load', () => {
+            console.log('🌐 Page loaded, auto-fetching data...');
+            setTimeout(fetchData, 1000);
+        });
+        
+        // Test API URL accessibility
+        console.log('🔗 API URL:', API_URL);
+        console.log('📋 To test manually, open:', API_URL);
+    </script>
+</body>
+</html>

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Google Sheets Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .loading { background-color: #fff3cd; color: #856404; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #6c757d; cursor: not-allowed; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 Simple Google Sheets Test</h1>
+        <p>Testing the modular JavaScript components</p>
+        
+        <div>
+            <strong>API URL:</strong><br>
+            <code>https://opensheet.elk.sh/1TgjxVUu9Bci2ivFxk1hHPGVNVfUsxztXD4QoZEXsYUc/PO</code>
+        </div>
+        
+        <div style="margin: 20px 0;">
+            <button onclick="window.location.href='../index.html'" style="background-color: #28a745; margin-right: 10px;">🏠 Back to Home</button>
+            <button onclick="testFetch()" id="test-btn">🚀 Test Data Fetch</button>
+            <button onclick="testService()" id="service-btn">🔧 Test Service</button>
+            <button onclick="clearResults()" id="clear-btn">🗑️ Clear</button>
+        </div>
+        
+        <div id="status"></div>
+        <div id="results"></div>
+    </div>
+
+    <!-- Include our modules -->
+    <script src="js/utils.js"></script>
+    <script src="js/gs-data-service.js"></script>
+
+    <script>
+        async function testFetch() {
+            const statusDiv = document.getElementById('status');
+            const resultsDiv = document.getElementById('results');
+            const testBtn = document.getElementById('test-btn');
+            
+            statusDiv.innerHTML = '<div class="loading">🔄 Testing direct fetch...</div>';
+            resultsDiv.innerHTML = '';
+            testBtn.disabled = true;
+            
+            try {
+                const url = 'https://opensheet.elk.sh/1TgjxVUu9Bci2ivFxk1hHPGVNVfUsxztXD4QoZEXsYUc/PO';
+                
+                console.log('Fetching from:', url);
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('Data received:', data);
+                
+                statusDiv.innerHTML = `<div class="success">✅ Success! Retrieved ${data.length} rows</div>`;
+                
+                // Show first few rows
+                if (data.length > 0) {
+                    const headers = Object.keys(data[0]);
+                    const preview = data.slice(0, 5);
+                    
+                    let tableHtml = `
+                        <h3>📊 Data Preview (first 5 rows):</h3>
+                        <table>
+                            <thead>
+                                <tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>
+                            </thead>
+                            <tbody>
+                                ${preview.map(row => `
+                                    <tr>${headers.map(h => `<td>${row[h] || ''}</td>`).join('')}</tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                        <h3>🔍 Raw JSON (first row):</h3>
+                        <pre>${JSON.stringify(data[0], null, 2)}</pre>
+                    `;
+                    
+                    resultsDiv.innerHTML = tableHtml;
+                }
+                
+            } catch (error) {
+                console.error('Fetch failed:', error);
+                statusDiv.innerHTML = `<div class="error">❌ Failed: ${error.message}</div>`;
+                resultsDiv.innerHTML = `<pre>Error: ${error.stack}</pre>`;
+            } finally {
+                testBtn.disabled = false;
+            }
+        }
+        
+        async function testService() {
+            const statusDiv = document.getElementById('status');
+            const resultsDiv = document.getElementById('results');
+            const serviceBtn = document.getElementById('service-btn');
+            
+            statusDiv.innerHTML = '<div class="loading">🔄 Testing service module...</div>';
+            resultsDiv.innerHTML = '';
+            serviceBtn.disabled = true;
+            
+            try {
+                console.log('Testing gsDataService...');
+                
+                // Test connection first
+                const connectionTest = await gsDataService.testConnection();
+                console.log('Connection test result:', connectionTest);
+                
+                if (!connectionTest.success) {
+                    throw new Error(connectionTest.message);
+                }
+                
+                // Fetch data using service
+                const data = await gsDataService.fetchData(false);
+                console.log('Service data:', data);
+                
+                statusDiv.innerHTML = `
+                    <div class="success">
+                        ✅ Service test successful!<br>
+                        Retrieved ${data.length} rows in ${connectionTest.responseTime}ms
+                    </div>
+                `;
+                
+                // Show service status
+                const status = gsDataService.getStatus();
+                
+                let resultsHtml = `
+                    <h3>🔧 Service Status:</h3>
+                    <pre>${JSON.stringify(status, null, 2)}</pre>
+                `;
+                
+                if (data.length > 0) {
+                    resultsHtml += `
+                        <h3>📊 Sample Data:</h3>
+                        <pre>${JSON.stringify(data.slice(0, 3), null, 2)}</pre>
+                    `;
+                }
+                
+                resultsDiv.innerHTML = resultsHtml;
+                
+            } catch (error) {
+                console.error('Service test failed:', error);
+                statusDiv.innerHTML = `<div class="error">❌ Service test failed: ${error.message}</div>`;
+                resultsDiv.innerHTML = `<pre>Error: ${error.stack}</pre>`;
+            } finally {
+                serviceBtn.disabled = false;
+            }
+        }
+        
+        function clearResults() {
+            document.getElementById('status').innerHTML = '';
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        // Auto-test on page load
+        window.addEventListener('load', () => {
+            console.log('🌐 Page loaded');
+            console.log('Utils available:', typeof Utils !== 'undefined');
+            console.log('gsDataService available:', typeof gsDataService !== 'undefined');
+            
+            // Auto-run test after 1 second
+            setTimeout(testFetch, 1000);
+        });
+    </script>
+</body>
+</html>

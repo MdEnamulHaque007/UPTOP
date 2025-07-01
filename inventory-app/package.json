@@ -1,0 +1,50 @@
+{
+  "name": "dynamic-inventory-dashboard",
+  "version": "1.0.0",
+  "description": "A dynamic inventory management dashboard that fetches data from Google Sheets and displays interactive visualizations for shoe manufacturing companies.",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server . -p 8080 -o",
+    "dev": "npx live-server --port=8080 --open=/dashboard.html",
+    "test": "npx http-server . -p 8080 -o /dashboard-test.html",
+    "build": "echo 'No build process needed for vanilla JS project'",
+    "deploy": "echo 'Deploy to your web server or GitHub Pages'",
+    "lint": "echo 'Add ESLint configuration if needed'",
+    "format": "echo 'Add Prettier configuration if needed'"
+  },
+  "keywords": [
+    "inventory",
+    "dashboard",
+    "google-sheets",
+    "charts",
+    "javascript",
+    "responsive",
+    "manufacturing",
+    "analytics",
+    "visualization",
+    "real-time"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/dynamic-inventory-dashboard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/dynamic-inventory-dashboard/issues"
+  },
+  "homepage": "https://yourusername.github.io/dynamic-inventory-dashboard",
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "live-server": "^1.2.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ]
+}
